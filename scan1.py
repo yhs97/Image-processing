@@ -1,5 +1,5 @@
 # USAGE
-# python scan.py --image images/page.jpg
+# python scan1.py --image images/page.jpg
 
 from pyimagesearch.transform import four_point_transform
 from skimage.filters import threshold_local
@@ -24,24 +24,36 @@ image = imutils.resize(image, height = 500)
 # convert the image to grayscale, blur it, and find edges
 # in the image
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+hsv=cv2.cvtColor(image.copy(), cv2.COLOR_BGR2HSV)
+hue, saturation, value = cv2.split(hsv)
 #clahe1 = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
 #cl2 = clahe1.apply(gray)
-#gray = cv2.GaussianBlur(gray, (5, 5), 0)
+#value = cv2.GaussianBlur(value, (3, 3), 0)
 
-gray = cv2.medianBlur(gray,5)
-#gray = cv2.bilateralFilter(gray,3,75,75)
-th = cv2.adaptiveThreshold(gray,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,\
-            cv2.THRESH_BINARY,11,2)
+value = cv2.medianBlur(value,5)
+#value = cv2.bilateralFilter(value,5,75,75)
+th = cv2.adaptiveThreshold(value,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,\
+			cv2.THRESH_BINARY,11,2)
+#retval, th = cv2.threshold(value, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
 
+thresholded_open = cv2.morphologyEx(th, cv2.MORPH_OPEN, (5,5))
+thresholded_close = cv2.morphologyEx(thresholded_open, cv2.MORPH_CLOSE, (5,5))
 
 #kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
 #dilated = cv2.dilate(th, kernel, iterations=2)
-edged = cv2.Canny(th, 5, 10)
+#edged = cv2.Canny(thresholded_close, 5, 15)
+
+edged = cv2.Laplacian(thresholded_close,cv2.CV_8UC1)
+#kernel = np.ones((5,5),np.uint8)
+#erosion = cv2.erode(edged,kernel,iterations = 1)
+#dilation = cv2.dilate(edged,kernel,iterations = 1)
+
 
 # show the original image and the edge detected image
 
 print("STEP 1: Edge Detection")
-cv2.imshow("Thresh Image", th)
+#cv2.imshow("Thresholded", th)
+cv2.imshow("HSV value", value)
 cv2.imshow("Image", image)
 cv2.imshow("Edged", edged)
 cv2.waitKey(0)
@@ -51,13 +63,13 @@ cv2.destroyAllWindows()
 # largest ones, and initialize the screen contour
 cnts = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 cnts = cnts[0] if imutils.is_cv2() else cnts[1]
-cnts = sorted(cnts, key = cv2.contourArea, reverse = True)[:5]
+cnts = sorted(cnts, key = cv2.contourArea, reverse = True)[:10]
 
 # loop over the contours
 for c in cnts:
 	# approximate the contour
 	peri = cv2.arcLength(c, True)
-	approx = cv2.approxPolyDP(c, 0.02 * peri, True)
+	approx = cv2.approxPolyDP(c, 0.05 * peri, True)
 
 	# if our approximated contour has four points, then we
 	# can assume that we have found our screen
