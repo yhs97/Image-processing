@@ -1,7 +1,7 @@
 # USAGE
 # python scan1.py --image images/page.jpg
 
-from pyimagesearch.transform import four_point_transform
+from transformp.transform import four_point_transform
 from skimage.filters import threshold_local
 import numpy as np
 import argparse
