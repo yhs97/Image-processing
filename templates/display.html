@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>Flask</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/cosium-opencvjs@1.0.4/build/cv.js"></script>
+</head>
+<body>
+<h2>Hello</h2>
+
+
+<div>
+  <div class="inputoutput">
+    <form id="cpd-file" method="post" name="myform" action="/convert" enctype="multipart/form-data" onsubmit=sendForm()>
+      Upload Prescription:<input id="file" type="file" name="file"><br>
+
+      Submit:<input type="submit" value="Submit" name="submit">
+
+    </form>
+    
+  </div>
+
+<script>
+  document.getElementById('cpd-file').addEventListener('submit', function(evt){
+    evt.preventDefault();
+
+    var formData = new FormData();
+// Attach file
+       formData.append('file', $('input[type=file]')[0].files[0]); 
+        //fd.append("CustomField", "This is some extra data");
+        $.ajax({
+            url: 'convert',  
+            type: 'POST',
+            data: formData,
+            success:function(data){
+                console.log('done');
+            },
+            cache: false,
+            contentType: false,
+            processData: false
+        });
+      })
+</script>
+
+
+
+  <div class="inputoutput">
+    <canvas id="canvasOutput" >
+      <img src="/Users/yashsarvaiya/machine_learnig/test/document-scanner2/clear.jpg">
+    </canvas>
+    <div class="caption">canvasOutput</div>
+
+  </div>
+</div>            
+</body>
+</html>
+
